@@ -4,10 +4,12 @@ variable "do_token" {
 
 variable "cluster_name" {
     description = "Name of the digital ocean kubernetes cluster"
+    default = "mihaiblebea-platform-cluster"
 }
 
 variable "node_pool_name" {
     description = "Name of the node pool in digital ocean"
+    default = "mihaiblebea-platform-node-pool"
 }
 
 variable "domain_name" {

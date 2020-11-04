@@ -5,7 +5,7 @@ terraform {
         organization = "PurpleTreeTech"
 
         workspaces {
-            name = "go-broadcast"
+            name = "mihaiblebea-platform"
         }
     }
 }
@@ -25,7 +25,7 @@ resource "digitalocean_kubernetes_cluster" "cluster" {
         name       = "worker-pool"
         size       = "s-1vcpu-2gb"
         node_count = 1
-        tags       = var.node_tags
+        # tags       = var.node_tags
     }
 }
 
@@ -43,24 +43,24 @@ provider "digitalocean" {
     version = "1.22.0"
 }
 
-resource "digitalocean_domain" "mihaiblebea_com" {
-    name       = var.domain_name
-    ip_address = digitalocean_loadbalancer.public.ip
-}
+# resource "digitalocean_domain" "mihaiblebea_com" {
+#     name       = var.domain_name
+#     ip_address = digitalocean_loadbalancer.public.ip
+# }
 
-resource "digitalocean_certificate" "mihaiblebea" {
-    name    = "mihaiblebea-cert"
-    type    = "lets_encrypt"
-    domains = [var.domain_name]
-}
+# resource "digitalocean_certificate" "mihaiblebea" {
+#     name    = "mihaiblebea-cert"
+#     type    = "lets_encrypt"
+#     domains = [var.domain_name]
+# }
 
-resource "digitalocean_record" "txt_google_search_console" {
-    domain   = var.domain_name
-    type     = "TXT"
-    name     = "@"
-    priority = 10
-    value    = var.google_search_console_code
-}
+# resource "digitalocean_record" "txt_google_search_console" {
+#     domain   = var.domain_name
+#     type     = "TXT"
+#     name     = "@"
+#     priority = 10
+#     value    = var.google_search_console_code
+# }
 
 resource "digitalocean_loadbalancer" "public" {
     name   = "loadbalancer-1"
