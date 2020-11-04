@@ -38,11 +38,6 @@ resource "local_file" "kubeconfig" {
     filename = pathexpand(var.kubeconfig_path)
 }
 
-provider "digitalocean" {
-    token   = var.do_token
-    version = "1.22.0"
-}
-
 # resource "digitalocean_domain" "mihaiblebea_com" {
 #     name       = var.domain_name
 #     ip_address = digitalocean_loadbalancer.public.ip
