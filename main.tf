@@ -26,13 +26,13 @@ resource "digitalocean_kubernetes_cluster" "cluster" {
     name    = var.cluster_name
     region  = "lon1"
     version = "1.18.6-do.0"
-    tags    = var.cluster_tags
+    # tags    = var.cluster_tags
 
     node_pool {
         name       = "worker-pool"
         size       = "s-1vcpu-2gb"
         node_count = 1
-        # tags       = var.node_tags
+        tags       = var.node_tags
     }
 }
 
