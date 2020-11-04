@@ -17,6 +17,6 @@ variable "domain_name" {
     default = "mihaiblebea.com"
 }
 
-variable "google_search_console_code" {
-    description = "Code from google search console to verify domain ownership"
-}
+# variable "google_search_console_code" {
+#     description = "Code from google search console to verify domain ownership"
+# }
