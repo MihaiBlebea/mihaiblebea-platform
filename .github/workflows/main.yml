@@ -12,6 +12,9 @@ jobs:
         
         steps:
         - uses: actions/checkout@v2
+
+        - name: Set the value
+          run: echo "TF_VAR_do_token=${{ secrets.DO_TOKEN }}" >> $GITHUB_ENV
         
         - name: HashiCorp - Setup Terraform
           uses: hashicorp/setup-terraform@v1.1.0
@@ -30,12 +33,12 @@ jobs:
         - name: Terraform Plan
           working-directory: .
           run: terraform plan
-          env:
-            TF_VAR_do_token: "TF_VAR_do_token"
+        #   env:
+        #     TF_VAR_do_token: "TF_VAR_do_token"
 
         - name: Terraform Apply
           working-directory: .
           if: github.ref == 'refs/heads/master' && github.event_name == 'push'
           run: terraform apply -auto-approve
-          env:
-            TF_VAR_do_token: "TF_VAR_do_token"
+        #   env:
+        #     TF_VAR_do_token: "TF_VAR_do_token"
