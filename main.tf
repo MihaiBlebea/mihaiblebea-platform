@@ -1,6 +1,13 @@
 terraform {
     required_version = "0.13.5"
 
+    required_providers {
+        digitalocean = {
+            source = "digitalocean/digitalocean"
+            version = "~> 1.22.0"
+        }
+    }
+
     backend "remote" {
         organization = "PurpleTreeTech"
 
@@ -11,7 +18,6 @@ terraform {
 }
 
 provider "digitalocean" {
-    source  = "digitalocean/digitalocean"
     token   = var.do_token
     version = "1.22.0"
 }
