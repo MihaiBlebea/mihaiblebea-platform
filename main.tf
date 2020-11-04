@@ -11,6 +11,7 @@ terraform {
 }
 
 provider "digitalocean" {
+    source  = "digitalocean/digitalocean"
     token   = var.do_token
     version = "1.22.0"
 }
@@ -57,37 +58,37 @@ resource "local_file" "kubeconfig" {
 #     value    = var.google_search_console_code
 # }
 
-resource "digitalocean_loadbalancer" "public" {
-    name   = "loadbalancer-1"
-    region = "lon1"
+# resource "digitalocean_loadbalancer" "public" {
+#     name   = "loadbalancer-1"
+#     region = "lon1"
 
-    forwarding_rule {
-        entry_port     = 80
-        entry_protocol = "http"
+#     forwarding_rule {
+#         entry_port     = 80
+#         entry_protocol = "http"
 
-        target_port     = 30011
-        target_protocol = "http"
-    }
+#         target_port     = 30011
+#         target_protocol = "http"
+#     }
 
-    forwarding_rule {
-        entry_port     = 443
-        entry_protocol = "https"
+#     forwarding_rule {
+#         entry_port     = 443
+#         entry_protocol = "https"
 
-        target_port     = 30011
-        target_protocol = "http"
+#         target_port     = 30011
+#         target_protocol = "http"
 
-        certificate_id = digitalocean_certificate.mihaiblebea.id
-    }
+#         certificate_id = digitalocean_certificate.mihaiblebea.id
+#     }
 
-    healthcheck {
-        port     = 22
-        protocol = "tcp"
-    }
+#     healthcheck {
+#         port     = 22
+#         protocol = "tcp"
+#     }
 
-    redirect_http_to_https = true
+#     redirect_http_to_https = true
 
-    droplet_ids = [var.droplet_id]
-}
+#     droplet_ids = [var.droplet_id]
+# }
 
 resource "kubernetes_ingress" "ingress_lb" {
     metadata {
