@@ -1,11 +1,18 @@
 terraform {
-    required_version = "0.12.20"
+    required_version = "0.13.5"
+
+    required_providers {
+        digitalocean = {
+            source = "digitalocean/digitalocean"
+            version = "~> 1.22.0"
+        }
+    }
 
     backend "remote" {
         organization = "PurpleTreeTech"
 
         workspaces {
-            name = "go-broadcast"
+            name = "mihaiblebea-platform"
         }
     }
 }
@@ -19,7 +26,7 @@ resource "digitalocean_kubernetes_cluster" "cluster" {
     name    = var.cluster_name
     region  = "lon1"
     version = "1.18.6-do.0"
-    tags    = var.cluster_tags
+    # tags    = var.cluster_tags
 
     node_pool {
         name       = "worker-pool"
@@ -38,61 +45,56 @@ resource "local_file" "kubeconfig" {
     filename = pathexpand(var.kubeconfig_path)
 }
 
-provider "digitalocean" {
-    token   = var.do_token
-    version = "1.22.0"
-}
+# resource "digitalocean_domain" "mihaiblebea_com" {
+#     name       = var.domain_name
+#     ip_address = digitalocean_loadbalancer.public.ip
+# }
 
-resource "digitalocean_domain" "mihaiblebea_com" {
-    name       = var.domain_name
-    ip_address = digitalocean_loadbalancer.public.ip
-}
+# resource "digitalocean_certificate" "mihaiblebea" {
+#     name    = "mihaiblebea-cert"
+#     type    = "lets_encrypt"
+#     domains = [var.domain_name]
+# }
 
-resource "digitalocean_certificate" "mihaiblebea" {
-    name    = "mihaiblebea-cert"
-    type    = "lets_encrypt"
-    domains = [var.domain_name]
-}
+# resource "digitalocean_record" "txt_google_search_console" {
+#     domain   = var.domain_name
+#     type     = "TXT"
+#     name     = "@"
+#     priority = 10
+#     value    = var.google_search_console_code
+# }
 
-resource "digitalocean_record" "txt_google_search_console" {
-    domain   = var.domain_name
-    type     = "TXT"
-    name     = "@"
-    priority = 10
-    value    = var.google_search_console_code
-}
+# resource "digitalocean_loadbalancer" "public" {
+#     name   = "loadbalancer-1"
+#     region = "lon1"
 
-resource "digitalocean_loadbalancer" "public" {
-    name   = "loadbalancer-1"
-    region = "lon1"
+#     forwarding_rule {
+#         entry_port     = 80
+#         entry_protocol = "http"
 
-    forwarding_rule {
-        entry_port     = 80
-        entry_protocol = "http"
+#         target_port     = 30011
+#         target_protocol = "http"
+#     }
 
-        target_port     = 30011
-        target_protocol = "http"
-    }
+#     forwarding_rule {
+#         entry_port     = 443
+#         entry_protocol = "https"
 
-    forwarding_rule {
-        entry_port     = 443
-        entry_protocol = "https"
+#         target_port     = 30011
+#         target_protocol = "http"
 
-        target_port     = 30011
-        target_protocol = "http"
+#         certificate_id = digitalocean_certificate.mihaiblebea.id
+#     }
 
-        certificate_id = digitalocean_certificate.mihaiblebea.id
-    }
+#     healthcheck {
+#         port     = 22
+#         protocol = "tcp"
+#     }
 
-    healthcheck {
-        port     = 22
-        protocol = "tcp"
-    }
+#     redirect_http_to_https = true
 
-    redirect_http_to_https = true
-
-    droplet_ids = [var.droplet_id]
-}
+#     droplet_ids = [var.droplet_id]
+# }
 
 resource "kubernetes_ingress" "ingress_lb" {
     metadata {
