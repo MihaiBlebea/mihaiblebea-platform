@@ -27,7 +27,7 @@ provider "digitalocean" {
     version = "1.22.0"
 }
 
-resource "digitalocean_kubernetes_cluster" "cluster" {
+resource "digitalocean_kubernetes_cluster" "platform_cluster" {
     name    = var.cluster_name
     region  = "lon1"
     version = "1.19.3-do.2"
@@ -44,10 +44,10 @@ resource "digitalocean_kubernetes_cluster" "cluster" {
 provider "helm" {
     kubernetes {
         load_config_file       = false
-        host                   = digitalocean_kubernetes_cluster.cluster.endpoint
-        token                  = digitalocean_kubernetes_cluster.cluster.kube_config[0].token
+        host                   = digitalocean_kubernetes_cluster.platform_cluster.endpoint
+        token                  = digitalocean_kubernetes_cluster.platform_cluster.kube_config[0].token
         cluster_ca_certificate = base64decode(
-            digitalocean_kubernetes_cluster.cluster.kube_config[0].cluster_ca_certificate
+            digitalocean_kubernetes_cluster.platform_cluster.kube_config[0].cluster_ca_certificate
         )
     }
 }
@@ -57,10 +57,10 @@ resource "helm_release" "nginx" {
     chart      = "nginx-ingress"
     repository = "https://kubernetes-charts.storage.googleapis.com"
 
-    # set {
-    #     name  = "controller.service.externalTrafficPolicy"
-    #     value = "Local"
-    # }
+    set {
+        name  = "controller.service.loadBalancerIP"
+        value = "159.65.212.99"
+    }
     
     # set {
     #     name  = "controller.service.loadBalancerIP"
@@ -122,10 +122,10 @@ resource "helm_release" "nginx" {
 
 provider "kubernetes" {
     load_config_file       = false
-    host                   = digitalocean_kubernetes_cluster.cluster.endpoint
-    token                  = digitalocean_kubernetes_cluster.cluster.kube_config[0].token
+    host                   = digitalocean_kubernetes_cluster.platform_cluster.endpoint
+    token                  = digitalocean_kubernetes_cluster.platform_cluster.kube_config[0].token
     cluster_ca_certificate = base64decode(
-        digitalocean_kubernetes_cluster.cluster.kube_config[0].cluster_ca_certificate
+        digitalocean_kubernetes_cluster.platform_cluster.kube_config[0].cluster_ca_certificate
     )
 }
 
@@ -169,6 +169,6 @@ resource "kubernetes_ingress" "ingress_load_balancer" {
 }
 
 resource "local_file" "kubeconfig" {
-    content  = digitalocean_kubernetes_cluster.cluster.kube_config[0].raw_config
+    content  = digitalocean_kubernetes_cluster.platform_cluster.kube_config[0].raw_config
     filename = pathexpand(var.kubeconfig_path)
 }
