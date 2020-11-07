@@ -3,8 +3,13 @@ terraform {
 
     required_providers {
         digitalocean = {
-            source = "digitalocean/digitalocean"
+            source  = "digitalocean/digitalocean"
             version = "~> 1.22.0"
+        }
+
+        local = {
+            source  = "hashicorp/local"
+            version = "~> 2.0.0"
         }
     }
 
@@ -22,28 +27,46 @@ provider "digitalocean" {
     version = "1.22.0"
 }
 
-# resource "digitalocean_kubernetes_cluster" "cluster" {
-#     name    = var.cluster_name
-#     region  = "lon1"
-#     version = "1.18.6-do.0"
-#     # tags    = var.cluster_tags
+resource "digitalocean_kubernetes_cluster" "cluster" {
+    name    = var.cluster_name
+    region  = "lon1"
+    version = "1.19.3-do.2"
+    tags    = var.cluster_tags
 
-#     node_pool {
-#         name       = "worker-pool"
-#         size       = "s-1vcpu-2gb"
-#         node_count = 1
-#         tags       = var.node_tags
-#     }
-# }
+    node_pool {
+        name       = "worker-pool"
+        size       = "s-1vcpu-2gb"
+        node_count = 1
+        tags       = var.node_tags
+    }
+}
 
-# data "digitalocean_kubernetes_cluster" "cluster" {
-#     name = var.cluster_name
-# }
+provider "helm" {
+    kubernetes {
+        load_config_file       = false
+        host                   = digitalocean_kubernetes_cluster.cluster.endpoint
+        token                  = digitalocean_kubernetes_cluster.cluster.kube_config[0].token
+        cluster_ca_certificate = base64decode(
+            digitalocean_kubernetes_cluster.cluster.kube_config[0].cluster_ca_certificate
+        )
+    }
+}
 
-# resource "local_file" "kubeconfig" {
-#     content  = digitalocean_kubernetes_cluster.cluster.kube_config[0].raw_config
-#     filename = pathexpand(var.kubeconfig_path)
-# }
+resource "helm_release" "nginx" {
+    name       = "iexperiment"
+    chart      = "nginx-ingress"
+    repository = "https://kubernetes-charts.storage.googleapis.com"
+
+    # set {
+    #     name  = "controller.service.externalTrafficPolicy"
+    #     value = "Local"
+    # }
+    
+    # set {
+    #     name  = "controller.service.loadBalancerIP"
+    #     value = azurerm_public_ip.kube_public_ip.ip_address
+    # }
+}
 
 # resource "digitalocean_domain" "mihaiblebea_com" {
 #     name       = var.domain_name
@@ -56,13 +79,13 @@ provider "digitalocean" {
 #     domains = [var.domain_name]
 # }
 
-# resource "digitalocean_record" "txt_google_search_console" {
-#     domain   = var.domain_name
-#     type     = "TXT"
-#     name     = "@"
-#     priority = 10
-#     value    = var.google_search_console_code
-# }
+resource "digitalocean_record" "txt_google_search_console" {
+    domain   = var.domain_name
+    type     = "TXT"
+    name     = "@"
+    priority = 10
+    value    = var.google_search_console_code
+}
 
 # resource "digitalocean_loadbalancer" "public" {
 #     name   = "loadbalancer-1"
@@ -96,14 +119,24 @@ provider "digitalocean" {
 #     droplet_ids = [var.droplet_id]
 # }
 
-resource "kubernetes_ingress" "ingress_lb" {
+
+provider "kubernetes" {
+    load_config_file       = false
+    host                   = digitalocean_kubernetes_cluster.cluster.endpoint
+    token                  = digitalocean_kubernetes_cluster.cluster.kube_config[0].token
+    cluster_ca_certificate = base64decode(
+        digitalocean_kubernetes_cluster.cluster.kube_config[0].cluster_ca_certificate
+    )
+}
+
+resource "kubernetes_ingress" "ingress_load_balancer" {
     metadata {
         name = "ingress-lb"
     }
 
     spec {
         backend {
-            service_name = "MyApp1"
+            service_name = "app1"
             service_port = 8080
         }
 
@@ -111,7 +144,7 @@ resource "kubernetes_ingress" "ingress_lb" {
             http {
                 path {
                     backend {
-                        service_name = "MyApp1"
+                        service_name = "app1"
                         service_port = 8080
                     }
 
@@ -120,7 +153,7 @@ resource "kubernetes_ingress" "ingress_lb" {
 
                 path {
                     backend {
-                        service_name = "MyApp2"
+                        service_name = "app2"
                         service_port = 8080
                     }
 
@@ -133,4 +166,9 @@ resource "kubernetes_ingress" "ingress_lb" {
             secret_name = "tls-secret"
         }
     }
+}
+
+resource "local_file" "kubeconfig" {
+    content  = digitalocean_kubernetes_cluster.cluster.kube_config[0].raw_config
+    filename = pathexpand(var.kubeconfig_path)
 }
