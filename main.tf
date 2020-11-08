@@ -58,14 +58,19 @@ resource "helm_release" "nginx" {
     repository = "https://kubernetes-charts.storage.googleapis.com"
 
     set {
-        name  = "controller.service.loadBalancerIP"
-        value = "159.65.212.99"
+        name  = "controller.service.nodePorts.http"
+        value = "8081"
     }
-    
-    # set {
-    #     name  = "controller.service.loadBalancerIP"
-    #     value = azurerm_public_ip.kube_public_ip.ip_address
-    # }
+
+    set {
+        name = "nginx.ingress.kubernetes.io/force-ssl-redirect"
+        value = true
+    }
+
+    set {
+        name = "controller.publishService.enabled"
+        value = true
+    }
 }
 
 # resource "digitalocean_domain" "mihaiblebea_com" {
@@ -132,6 +137,10 @@ provider "kubernetes" {
 resource "kubernetes_ingress" "ingress_load_balancer" {
     metadata {
         name = "ingress-lb"
+        annotations = {
+            "nginx.ingress.kubernetes.io/ssl-redirect" = "true"
+            "nginx.ingress.kubernetes.io/force-ssl-redirect" ="true"
+        }
     }
 
     spec {
