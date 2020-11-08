@@ -65,7 +65,7 @@ resource "helm_release" "nginx" {
 
     set {
         name = "nginx.ingress.kubernetes.io/force-ssl-redirect"
-        value = true
+        value = "true"
     }
 
     set {
