@@ -56,7 +56,7 @@ resource "helm_release" "nginx" {
     name       = "iexperiment"
     chart      = "nginx-ingress"
     repository = "https://kubernetes-charts.storage.googleapis.com"
-    depends_on = digitalocean_kubernetes_cluster.platform_cluster
+    depends_on = [digitalocean_kubernetes_cluster.platform_cluster]
 
     set {
         name  = "controller.service.nodePorts.http"
