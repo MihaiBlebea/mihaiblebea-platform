@@ -69,6 +69,11 @@ resource "helm_release" "nginx" {
     }
 
     set {
+        name = "controller.service.type"
+        value = "NodePort"
+    }
+
+    set {
         name = "controller.publishService.enabled"
         value = true
     }
